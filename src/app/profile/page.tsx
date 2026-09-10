@@ -4,8 +4,8 @@ import DefaultLayout from "@/components/Layouts/DefaultLaout";
 import ProfileBox from "@/components/ProfileBox";
 
 export const metadata: Metadata = {
-  title: "RISE-AI",
-  description: "RISE-AI | DASHBOARD",
+  title: "FedArb ADR | Profile",
+  description: "FedArb ADR | DASHBOARD",
 };
 
 const Profile = () => {

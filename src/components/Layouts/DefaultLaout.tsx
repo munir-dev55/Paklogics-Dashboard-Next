@@ -27,7 +27,7 @@ export default function DefaultLayout({ children }: { children: React.ReactNode 
             
             {/* Main Content */}
             <main>
-              <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
+              <div className="w-full px-4 py-4 md:px-5 md:py-6 2xl:px-10 2xl:py-10">
                 {children}
               </div>
             </main>

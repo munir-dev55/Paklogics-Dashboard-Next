@@ -16,7 +16,7 @@ const ChartTwo: React.FC = () => {
   ];
 
   const options: ApexOptions = {
-    colors: ["#5750F1", "#0ABEF9"],
+    colors: ["#001842", "#2563eb"],
     chart: {
       fontFamily: "Satoshi, sans-serif",
       type: "bar",
@@ -81,11 +81,9 @@ const ChartTwo: React.FC = () => {
       fontSize: "14px",
 
       markers: {
-        radius: 99,
-        width: 16,
-        height: 16,
-        strokeWidth: 10,
-        strokeColor: "transparent",
+        size: 8,
+        shape: "circle",
+        strokeWidth: 0,
       },
     },
     fill: {

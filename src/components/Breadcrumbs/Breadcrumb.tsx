@@ -2,11 +2,12 @@ import Link from "next/link";
 
 interface BreadcrumbProps {
   pageName: string;
+  parents?: { label: string; href: string }[];
 }
 
-const Breadcrumb = ({ pageName }: BreadcrumbProps) => {
+const Breadcrumb = ({ pageName, parents = [] }: BreadcrumbProps) => {
   return (
-    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <h2 className="text-[26px] font-bold leading-[30px] text-dark dark:text-white">
         {pageName}
       </h2>
@@ -15,9 +16,18 @@ const Breadcrumb = ({ pageName }: BreadcrumbProps) => {
         <ol className="flex items-center gap-2">
           <li>
             <Link className="font-medium" href="/">
-              Dashboard /
+              Dashboard
             </Link>
           </li>
+          {parents.map((parent) => (
+            <li key={parent.href} className="flex items-center gap-2">
+              <span aria-hidden="true">/</span>
+              <Link className="font-medium" href={parent.href}>
+                {parent.label}
+              </Link>
+            </li>
+          ))}
+          <li aria-hidden="true">/</li>
           <li className="font-medium text-primary">{pageName}</li>
         </ol>
       </nav>

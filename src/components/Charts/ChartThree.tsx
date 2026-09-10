@@ -11,7 +11,7 @@ const ChartThree: React.FC = () => {
       fontFamily: "Satoshi, sans-serif",
       type: "donut",
     },
-    colors: ["#5750F1", "#5475E5", "#8099EC", "#ADBCF2"],
+    colors: ["#001842", "#2563eb", "#3366ff", "#dbeafe"],
     labels: ["Desktop", "Tablet", "Mobile", "Unknown"],
     legend: {
       show: false,

@@ -2,9 +2,13 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ClickOutside from "@/components/ClickOutside";
+import ConfirmationModal from "@/components/shared/ConfirmationModal";
+import { useRouter } from "next/navigation";
 
 const DropdownUser = () => {
+  const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
@@ -14,14 +18,14 @@ const DropdownUser = () => {
         href="#"
       >
         <span className="h-12 w-12 rounded-full">
-        <Image
-      src="https://png.pngtree.com/png-vector/20220709/ourmid/pngtree-businessman-user-avatar-wearing-suit-with-red-tie-png-image_5809521.png"
-      width={110}
-      height={110}
-      className="rounded-full"
-      alt="Profile"
-      priority
-    />
+          <Image
+            src="https://png.pngtree.com/png-vector/20220709/ourmid/pngtree-businessman-user-avatar-wearing-suit-with-red-tie-png-image_5809521.png"
+            width={110}
+            height={110}
+            className="rounded-full"
+            alt="Profile"
+            priority
+          />
         </span>
 
         <span className="flex items-center gap-2 font-medium text-dark dark:text-dark-6">
@@ -69,7 +73,7 @@ const DropdownUser = () => {
                 Admin
               </span>
               <span className="block font-medium text-dark-5 dark:text-dark-6">
-                admin@rise.com
+                admin@adr.com
               </span>
             </span>
           </div>
@@ -104,7 +108,7 @@ const DropdownUser = () => {
               </Link>
             </li>
 
-            <li>
+            {/* <li>
               <Link
                 href="/pages/settings"
                 className="flex w-full items-center gap-2.5 rounded-[7px] p-2.5 text-sm font-medium text-dark-4 duration-300 ease-in-out hover:bg-gray-2 hover:text-dark dark:text-dark-6 dark:hover:bg-dark-3 dark:hover:text-white lg:text-base"
@@ -132,10 +136,17 @@ const DropdownUser = () => {
                 </svg>
                 Account Settings
               </Link>
-            </li>
+            </li> */}
           </ul>
           <div className="p-2.5">
-            <button className="flex w-full items-center gap-2.5 rounded-[7px] p-2.5 text-sm font-medium text-dark-4 duration-300 ease-in-out hover:bg-gray-2 hover:text-dark dark:text-dark-6 dark:hover:bg-dark-3 dark:hover:text-white lg:text-base">
+            <button
+              type="button"
+              onClick={() => {
+                setDropdownOpen(false);
+                setLogoutOpen(true);
+              }}
+              className="flex w-full items-center gap-2.5 rounded-[7px] p-2.5 text-sm font-medium text-dark-4 duration-300 ease-in-out hover:bg-gray-2 hover:text-dark dark:text-dark-6 dark:hover:bg-dark-3 dark:hover:text-white lg:text-base"
+            >
               <svg
                 className="fill-current"
                 width="18"
@@ -166,6 +177,17 @@ const DropdownUser = () => {
         </div>
       )}
       {/* <!-- Dropdown End --> */}
+      <ConfirmationModal
+        open={logoutOpen}
+        title="Logout"
+        description="Are you sure you want to logout from your account?"
+        confirmLabel="Logout"
+        onCancel={() => setLogoutOpen(false)}
+        onConfirm={() => {
+          setLogoutOpen(false);
+          router.replace("/auth/signin");
+        }}
+      />
     </ClickOutside>
   );
 };

@@ -21,7 +21,7 @@ const ChartOne: React.FC = () => {
       position: "top",
       horizontalAlign: "left",
     },
-    colors: ["#5750F1", "#0ABEF9"],
+    colors: ["#001842", "#2563eb"],
     chart: {
       fontFamily: "Satoshi, sans-serif",
       height: 310,

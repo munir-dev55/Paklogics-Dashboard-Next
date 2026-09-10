@@ -4,8 +4,8 @@ import DefaultLayout from "@/components/Layouts/DefaultLaout";
 import React from "react";
 
 export const metadata: Metadata = {
-  title: "RISE",
-  description: "RISE-AI | RISE-DASHBOARD",
+  title: "FedArb ADR",
+  description: "FedArb ADR | Dashboard",
 };
 
 export default function Home() {
