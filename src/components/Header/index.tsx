@@ -1,14 +1,54 @@
+"use client";
+
 import Link from "next/link";
-import DarkModeSwitcher from "./DarkModeSwitcher";
-import DropdownNotification from "./DropdownNotification";
 import DropdownUser from "./DropdownUser";
-import Image from "next/image";
-import SearchForm from "@/components/Header/SearchForm";
+import { usePathname } from "next/navigation";
+
+const routeTitles: Record<string, string> = {
+  "/": "Dashboard",
+  "/users": "Users",
+  "/case-management": "Case Management",
+  "/billing-invoices": "Billing & Invoices",
+  "/profile": "Profile",
+  "/terms-and-conditions": "Terms & Conditions",
+  "/privacy-policy": "Privacy Policy",
+};
+
+const getHeaderTitle = (pathname: string) => {
+  if (routeTitles[pathname]) {
+    return routeTitles[pathname];
+  }
+
+  if (pathname.startsWith("/users/")) {
+    return "User Details";
+  }
+
+  if (pathname.startsWith("/case-management/")) {
+    return "Case Details";
+  }
+
+  if (pathname.startsWith("/billing-invoices/")) {
+    return "Invoice Details";
+  }
+
+  return (
+    pathname
+      .split("/")
+      .filter(Boolean)
+      .at(-1)
+      ?.split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ") ?? "Dashboard"
+  );
+};
 
 const Header = (props: {
   sidebarOpen: string | boolean | undefined;
   setSidebarOpen: (arg0: boolean) => void;
 }) => {
+  const pathname = usePathname();
+  const headerTitle = getHeaderTitle(pathname);
+
   return (
     <header className="sticky top-0 z-999 flex w-full border-b border-stroke bg-white dark:border-stroke-dark dark:bg-gray-dark">
       <div className="flex flex-grow items-center justify-between px-4 py-5 shadow-2 md:px-5 2xl:px-10">
@@ -66,7 +106,7 @@ const Header = (props: {
         <div className="hidden xl:block">
           <div>
             <h1 className="mb-0.5 text-heading-5 font-bold text-dark dark:text-white">
-              Dashboard
+              {headerTitle}
             </h1>
             {/* <p className="text-grey-400 font-bold font-medium">ADR.COM</p> */}
           </div>

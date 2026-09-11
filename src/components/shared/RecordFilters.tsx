@@ -5,6 +5,9 @@ import type { SelectHTMLAttributes } from "react";
 const controlClass =
   "rounded-lg border border-stroke bg-white px-3 py-2.5 text-sm text-dark outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-stroke-dark dark:bg-gray-dark dark:text-white";
 
+const selectControlClass =
+  "w-full appearance-none rounded-lg border border-stroke bg-white py-2.5 pl-3 pr-10 text-sm text-dark outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-stroke-dark dark:bg-gray-dark dark:text-white";
+
 export function StatusSelect({
   label = "Status",
   options,
@@ -18,13 +21,36 @@ export function StatusSelect({
   return (
     <label className="flex flex-col gap-2 text-sm font-medium text-dark dark:text-white">
       {label}
-      <select {...props} className={controlClass}>
-        {allOption && <option value="">All statuses</option>}
-        {options.map((value) => (
-          <option key={value}>{value}</option>
-        ))}
-      </select>
+      <span className="relative block">
+        <select {...props} className={selectControlClass}>
+          {allOption && <option value="">Any status</option>}
+          {options.map((value) => (
+            <option key={value}>{value}</option>
+          ))}
+        </select>
+        <SelectChevron />
+      </span>
     </label>
+  );
+}
+
+function SelectChevron() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-dark-5 dark:text-dark-6"
+      viewBox="0 0 20 20"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M5 7.5L10 12.5L15 7.5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 

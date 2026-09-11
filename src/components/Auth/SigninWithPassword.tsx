@@ -1,16 +1,41 @@
 "use client";
-import React, { useState } from "react";
-import Link from "next/link";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+const ADMIN_EMAIL = "admin@adr.com";
+const ADMIN_PASSWORD = "Admin@123";
+const AUTH_STORAGE_KEY = "fedarb_admin_session";
 
 export default function SigninWithPassword() {
-  const [data, setData] = useState({
-    remember: false,
-  });
+  const router = useRouter();
+  const [error, setError] = useState("");
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
+    const email = String(formData.get("email") ?? "").trim();
+    const password = String(formData.get("password") ?? "");
+
+    if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
+      setError("Invalid email or password.");
+      return;
+    }
+
+    localStorage.setItem(
+      AUTH_STORAGE_KEY,
+      JSON.stringify({
+        email,
+        role: "Admin",
+        loggedInAt: new Date().toISOString(),
+      }),
+    );
+    router.replace("/");
+  };
 
   return (
-
-
-    <form>
+    <form onSubmit={handleSubmit}>
       <div className="mb-4">
         <label
           htmlFor="email"
@@ -20,10 +45,11 @@ export default function SigninWithPassword() {
         </label>
         <div className="relative">
           <input
+            id="email"
             type="email"
             placeholder="Enter your email"
             name="email"
-            className="w-full rounded-lg border border-stroke bg-transparent py-[15px] pl-6 pr-11 font-medium text-dark outline-none focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:focus:border-primary"
+            className="w-full rounded-lg border border-stroke bg-white py-3.5 pl-4 pr-11 font-medium text-dark outline-none focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:focus:border-primary"
           />
 
           <span className="absolute right-4.5 top-1/2 -translate-y-1/2">
@@ -55,11 +81,12 @@ export default function SigninWithPassword() {
         </label>
         <div className="relative">
           <input
+            id="password"
             type="password"
             name="password"
             placeholder="Enter your password"
             autoComplete="password"
-            className="w-full rounded-lg border border-stroke bg-transparent py-[15px] pl-6 pr-11 font-medium text-dark outline-none focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:focus:border-primary"
+            className="w-full rounded-lg border border-stroke bg-white py-3.5 pl-4 pr-11 font-medium text-dark outline-none focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:focus:border-primary"
           />
 
           <span className="absolute right-4.5 top-1/2 -translate-y-1/2">
@@ -88,7 +115,7 @@ export default function SigninWithPassword() {
         </div>
       </div>
 
-      <div className="mb-6 flex items-center justify-between gap-2 py-2">
+      {/* <div className="mb-6 flex items-center justify-between gap-2 py-2">
         <label
           htmlFor="remember"
           className="flex cursor-pointer select-none items-center font-satoshi text-base font-medium text-dark dark:text-white"
@@ -128,21 +155,22 @@ export default function SigninWithPassword() {
         >
           Forgot Password?
         </Link>
-      </div>
+      </div> */}
+
+      {error && (
+        <p className="mb-4 rounded-lg bg-error-light px-4 py-3 text-sm font-medium text-error">
+          {error}
+        </p>
+      )}
 
       <div className="mb-4.5">
         <button
           type="submit"
-          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary p-4 font-medium text-white transition hover:bg-opacity-90"
+          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3.5 font-semibold text-white transition hover:bg-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
-          Sign In
+          Login
         </button>
       </div>
     </form>
-
-
-
-
-    
   );
 }

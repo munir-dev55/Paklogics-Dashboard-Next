@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import Card from "./Card";
 import Pagination from "./Pagination";
+import { ViewIcon } from "../Tables/TableFive";
 
 export type TableColumn<T> = {
   key: string;
@@ -75,13 +76,13 @@ export default function DataTable<T extends { id: string }>({
                     {column.render(record)}
                   </td>
                 ))}
-                <td className="px-5 py-4">
+                <td className="px-5 py-4 align-middle">
                   <Link
                     href={`${detailsBasePath}/${encodeURIComponent(record.id)}`}
                     aria-label={`View ${record.id}`}
-                    className="rounded-md px-2 py-1 font-semibold text-primary hover:bg-primary-light focus-visible:outline focus-visible:outline-2 dark:text-white dark:hover:bg-dark-2"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full text-primary transition-colors hover:bg-primary-light focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:text-white dark:hover:bg-dark-2"
                   >
-                    View
+                    <ViewIcon />
                   </Link>
                 </td>
               </tr>

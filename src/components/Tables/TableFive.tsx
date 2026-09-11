@@ -3,133 +3,19 @@
 import { useEffect, useState, type ReactNode } from "react";
 import Pagination from "@/components/shared/Pagination";
 
-type UserStatus = "Active" | "Inactive";
-
-type UserRecord = {
-  id: number;
-  name: string;
-  firmCompany: string;
-  role: string;
-  email: string;
-  phone: string;
-  status: UserStatus;
-};
-
-const users: UserRecord[] = [
-  {
-    id: 1,
-    name: "Vivik",
-    firmCompany: "Meridian Corp",
-    role: "Case Manager",
-    email: "vivkor@gmail.com",
-    phone: "+1 202 555 0142",
-    status: "Active",
-  },
-  {
-    id: 2,
-    name: "Charlis Williams",
-    firmCompany: "Williams Legal",
-    role: "Neutral",
-    email: "charlisW@gmail.com",
-    phone: "+1 202 555 0186",
-    status: "Inactive",
-  },
-  {
-    id: 3,
-    name: "Mark",
-    firmCompany: "Pinnacle ADR",
-    role: "Lawyer",
-    email: "mark@gmail.com",
-    phone: "+1 202 555 0129",
-    status: "Active",
-  },
-  {
-    id: 4,
-    name: "Spy",
-    firmCompany: "Hartwell Construction",
-    role: "Client",
-    email: "spy@gmail.com",
-    phone: "+1 202 555 0175",
-    status: "Inactive",
-  },
-  {
-    id: 5,
-    name: "John Doe",
-    firmCompany: "FedArb ADR",
-    role: "Accounting Staff",
-    email: "jhondoe@gmail.com",
-    phone: "+1 202 555 0113",
-    status: "Active",
-  },
-  {
-    id: 6,
-    name: "John Doe",
-    firmCompany: "FedArb ADR",
-    role: "Accounting Staff",
-    email: "jhondoe@gmail.com",
-    phone: "+1 202 555 0113",
-    status: "Active",
-  },
-  {
-    id: 7,
-    name: "John Doe",
-    firmCompany: "FedArb ADR",
-    role: "Neutral",
-    email: "jhondoe@gmail.com",
-    phone: "+1 202 555 0113",
-    status: "Active",
-  },
-  {
-    id: 8,
-    name: "John Doe",
-    firmCompany: "FedArb ADR",
-    role: "Lawyer",
-    email: "jhondoe@gmail.com",
-    phone: "+1 202 555 0113",
-    status: "Active",
-  },
-  {
-    id: 9,
-    name: "John Doe",
-    firmCompany: "FedArb ADR",
-    role: "Case Manager",
-    email: "jhondoe@gmail.com",
-    phone: "+1 202 555 0113",
-    status: "Active",
-  },
-  {
-    id: 10,
-    name: "John Doe",
-    firmCompany: "FedArb ADR",
-    role: "Neutral",
-    email: "jhondoe@gmail.com",
-    phone: "+1 202 555 0113",
-    status: "Active",
-  },
-  {
-    id: 12,
-    name: "John Doe",
-    firmCompany: "FedArb ADR",
-    role: "Accounting Staff",
-    email: "jhondoe@gmail.com",
-    phone: "+1 202 555 0113",
-    status: "Active",
-  },
-  {
-    id: 11,
-    name: "John Doe",
-    firmCompany: "FedArb ADR",
-    role: "Case Manager",
-    email: "jhondoe@gmail.com",
-    phone: "+1 202 555 0113",
-    status: "Active",
-  },
-];
+import Link from "next/link";
+import ConfirmationModal from "@/components/shared/ConfirmationModal";
+import {
+  users,
+  type UserRecord,
+  type UserStatus,
+} from "@/components/Users/data";
 
 const itemsPerPage = 10;
 
 export default function TableFive() {
   const [data, setData] = useState(users);
+  const [userToDelete, setUserToDelete] = useState<UserRecord | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
@@ -200,35 +86,41 @@ export default function TableFive() {
           <span className="mb-2 block text-sm font-medium text-dark dark:text-white">
             Role
           </span>
-          <select
-            value={roleFilter}
-            onChange={(event) => setRoleFilter(event.target.value)}
-            className="w-full rounded-lg border border-stroke bg-white px-3 py-2.5 text-sm text-dark outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-dark-3 dark:bg-gray-dark dark:text-white"
-          >
-            <option value="">All roles</option>
-            {roles.map((role) => (
-              <option key={role} value={role}>
-                {role}
-              </option>
-            ))}
-          </select>
+          <span className="relative block">
+            <select
+              value={roleFilter}
+              onChange={(event) => setRoleFilter(event.target.value)}
+              className="w-full appearance-none rounded-lg border border-stroke bg-white py-2.5 pl-3 pr-10 text-sm text-dark outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-dark-3 dark:bg-gray-dark dark:text-white"
+            >
+              <option value="">All roles</option>
+              {roles.map((role) => (
+                <option key={role} value={role}>
+                  {role}
+                </option>
+              ))}
+            </select>
+            <SelectChevron />
+          </span>
         </label>
 
         <label className="block">
           <span className="mb-2 block text-sm font-medium text-dark dark:text-white">
             Status
           </span>
-          <select
-            value={statusFilter}
-            onChange={(event) =>
-              setStatusFilter(event.target.value as UserStatus | "")
-            }
-            className="w-full rounded-lg border border-stroke bg-white px-3 py-2.5 text-sm text-dark outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-dark-3 dark:bg-gray-dark dark:text-white"
-          >
-            <option value="">All statuses</option>
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
-          </select>
+          <span className="relative block">
+            <select
+              value={statusFilter}
+              onChange={(event) =>
+                setStatusFilter(event.target.value as UserStatus | "")
+              }
+              className="w-full appearance-none rounded-lg border border-stroke bg-white py-2.5 pl-3 pr-10 text-sm text-dark outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-dark-3 dark:bg-gray-dark dark:text-white"
+            >
+              <option value="">Any status</option>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+            <SelectChevron />
+          </span>
         </label>
 
         <button
@@ -306,17 +198,17 @@ export default function TableFive() {
                 </TableCell>
                 <TableCell align="right">
                   <div className="flex items-center justify-end gap-2">
-                    <button
-                      type="button"
+                    <Link
+                      href={`/users/${user.id}`}
                       aria-label={`View ${user.name}`}
                       title="View user"
                       className="inline-flex h-10 w-10 items-center justify-center rounded-full text-dark-5 transition-colors hover:bg-primary-light hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
                     >
                       <ViewIcon />
-                    </button>
+                    </Link>
                     <button
                       type="button"
-                      onClick={() => removeUser(user.id)}
+                      onClick={() => setUserToDelete(user)}
                       aria-label={`Delete ${user.name}`}
                       title="Delete user"
                       className="inline-flex h-10 w-10 items-center justify-center rounded-full text-dark-5 transition-colors hover:bg-error-light hover:text-error focus-visible:outline focus-visible:outline-2 focus-visible:outline-error"
@@ -353,7 +245,39 @@ export default function TableFive() {
           />
         </div>
       )}
+      <ConfirmationModal
+        open={userToDelete !== null}
+        title="Delete User"
+        description={`Are you sure you want to delete ${userToDelete?.name ?? "this user"}?`}
+        confirmLabel="Delete user"
+        icon={<DeleteIcon />}
+        onCancel={() => setUserToDelete(null)}
+        onConfirm={() => {
+          if (userToDelete) removeUser(userToDelete.id);
+          setUserToDelete(null);
+        }}
+      />
     </div>
+  );
+}
+
+function SelectChevron() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-dark-5 dark:text-dark-6"
+      viewBox="0 0 20 20"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M5 7.5L10 12.5L15 7.5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 
@@ -406,7 +330,7 @@ function TableCell({
   );
 }
 
-function ViewIcon() {
+export function ViewIcon() {
   return (
     <svg
       aria-hidden="true"

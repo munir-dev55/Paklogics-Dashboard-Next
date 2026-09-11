@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
 type ConfirmationModalProps = {
   open: boolean;
+  icon?: ReactNode;
   title: string;
   description: string;
   confirmLabel: string;
@@ -15,6 +16,7 @@ type ConfirmationModalProps = {
 
 export default function ConfirmationModal({
   open,
+  icon,
   title,
   description,
   confirmLabel,
@@ -52,19 +54,21 @@ export default function ConfirmationModal({
         className="w-full max-w-[535px] rounded-xl border border-stroke bg-white px-6 pb-7 pt-6 text-center shadow-lg dark:border-stroke-dark dark:bg-gray-dark sm:px-7"
       >
         <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-error-light text-error">
-          <svg
-            aria-hidden="true"
-            width="40"
-            height="40"
-            viewBox="0 0 40 40"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M16 31H11a3 3 0 0 1-3-3V12a3 3 0 0 1 3-3h5M23 13l7 7-7 7M30 20H15" />
-          </svg>
+          {icon ?? (
+            <svg
+              aria-hidden="true"
+              width="40"
+              height="40"
+              viewBox="0 0 40 40"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M16 31H11a3 3 0 0 1-3-3V12a3 3 0 0 1 3-3h5M23 13l7 7-7 7M30 20H15" />
+            </svg>
+          )}
         </div>
         <h2
           id="confirmation-title"
