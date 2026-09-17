@@ -9,6 +9,7 @@ const routeTitles: Record<string, string> = {
   "/users": "Users",
   "/case-management": "Case Management",
   "/billing-invoices": "Billing & Invoices",
+  "/audit-logs": "Audit Logs",
   "/profile": "Profile",
   "/terms-and-conditions": "Terms & Conditions",
   "/privacy-policy": "Privacy Policy",
@@ -29,6 +30,10 @@ const getHeaderTitle = (pathname: string) => {
 
   if (pathname.startsWith("/billing-invoices/")) {
     return "Invoice Details";
+  }
+
+  if (pathname.startsWith("/audit-logs/")) {
+    return "Audit Log Details";
   }
 
   return (

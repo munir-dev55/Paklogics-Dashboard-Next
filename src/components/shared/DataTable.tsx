@@ -19,8 +19,12 @@ type Props<T> = {
   columns: TableColumn<T>[];
   total: number;
   toolbar?: ReactNode;
-  detailsBasePath: string;
+  detailsBasePath?: string;
+  getDetailsHref?: (record: T) => string;
   pageSize?: number;
+  currentPage?: number;
+  totalPages?: number;
+  onPageChange?: (page: number) => void;
 };
 
 export default function DataTable<T extends { id: string }>({
@@ -31,17 +35,25 @@ export default function DataTable<T extends { id: string }>({
   total,
   toolbar,
   detailsBasePath,
+  getDetailsHref,
   pageSize = 10,
+  currentPage,
+  totalPages,
+  onPageChange,
 }: Props<T>) {
-  const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = Math.max(1, Math.ceil(records.length / pageSize));
-  const activePage = Math.min(currentPage, totalPages);
+  const [localPage, setLocalPage] = useState(1);
+  const isServerPaged = Boolean(onPageChange && totalPages);
+  const activePage = isServerPaged ? (currentPage ?? 1) : Math.min(localPage, Math.max(1, Math.ceil(records.length / pageSize)));
+  const pages = isServerPaged
+    ? Math.max(1, totalPages ?? 1)
+    : Math.max(1, Math.ceil(records.length / pageSize));
   const startIndex = (activePage - 1) * pageSize;
-  const currentRecords = records.slice(startIndex, startIndex + pageSize);
+  const currentRecords = isServerPaged ? records : records.slice(startIndex, startIndex + pageSize);
+  const hasDetails = Boolean(getDetailsHref || detailsBasePath);
 
   useEffect(() => {
-    setCurrentPage(1);
-  }, [records]);
+    if (!isServerPaged) setLocalPage(1);
+  }, [records, isServerPaged]);
 
   return (
     <Card role="region" aria-label={label} className="overflow-hidden">
@@ -60,9 +72,11 @@ export default function DataTable<T extends { id: string }>({
                   {column.header}
                 </th>
               ))}
-              <th scope="col" className="px-5 py-4 font-semibold">
-                Details
-              </th>
+              {hasDetails && (
+                <th scope="col" className="px-5 py-4 font-semibold">
+                  Details
+                </th>
+              )}
             </tr>
           </thead>
           <tbody className="divide-y divide-stroke dark:divide-stroke-dark">
@@ -76,21 +90,27 @@ export default function DataTable<T extends { id: string }>({
                     {column.render(record)}
                   </td>
                 ))}
-                <td className="px-5 py-4 align-middle">
-                  <Link
-                    href={`${detailsBasePath}/${encodeURIComponent(record.id)}`}
-                    aria-label={`View ${record.id}`}
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-full text-primary transition-colors hover:bg-primary-light focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:text-white dark:hover:bg-dark-2"
-                  >
-                    <ViewIcon />
-                  </Link>
-                </td>
+                {hasDetails && (
+                  <td className="px-5 py-4 align-middle">
+                    <Link
+                      href={
+                        getDetailsHref
+                          ? getDetailsHref(record)
+                          : `${detailsBasePath}/${encodeURIComponent(record.id)}`
+                      }
+                      aria-label={`View ${record.id}`}
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-full text-primary transition-colors hover:bg-primary-light focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:text-white dark:hover:bg-dark-2"
+                    >
+                      <ViewIcon />
+                    </Link>
+                  </td>
+                )}
               </tr>
             ))}
             {!records.length && (
               <tr>
                 <td
-                  colSpan={columns.length + 1}
+                  colSpan={columns.length + (hasDetails ? 1 : 0)}
                   className="px-5 py-12 text-center"
                 >
                   No {label.toLowerCase()} match your search. Try another search
@@ -107,8 +127,8 @@ export default function DataTable<T extends { id: string }>({
       <div className="flex justify-center border-t border-stroke px-4 py-5 dark:border-stroke-dark">
         <Pagination
           currentPage={activePage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
+          totalPages={pages}
+          onPageChange={onPageChange ?? setLocalPage}
           label={`${label} pagination`}
         />
       </div>

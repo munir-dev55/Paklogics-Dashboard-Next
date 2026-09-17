@@ -3,27 +3,26 @@ import "jsvectormap/dist/css/jsvectormap.css";
 import "flatpickr/dist/flatpickr.min.css";
 import "@/css/satoshi.css";
 import "@/css/style.css";
-import React, { useEffect, useState } from "react";
-import Loader from "@/components/common/Loader";
+import React from "react";
+import QueryProvider from "@/lib/query-provider";
+import { OverlayLoaderProvider } from "@/components/common/OverlayLoader";
+import AuthGuard from "@/components/Auth/AuthGuard";
+import { Toaster } from "sonner";
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  // const pathname = usePathname();
-
-  useEffect(() => {
-    setTimeout(() => setLoading(false), 1000);
-  }, []);
-
   return (
     <html lang="en">
       <body suppressHydrationWarning={true}>
-        {loading ? <Loader /> : children}
+        <QueryProvider>
+          <OverlayLoaderProvider>
+            <AuthGuard>{children}</AuthGuard>
+            <Toaster richColors position="top-right" />
+          </OverlayLoaderProvider>
+        </QueryProvider>
       </body>
     </html>
   );

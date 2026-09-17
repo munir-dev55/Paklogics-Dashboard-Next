@@ -2,36 +2,34 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-
-const ADMIN_EMAIL = "admin@adr.com";
-const ADMIN_PASSWORD = "Admin@123";
-const AUTH_STORAGE_KEY = "fedarb_admin_session";
+import { getErrorMessage } from "@/lib/api-error";
+import { useSignIn } from "@/hooks/useSignIn";
 
 export default function SigninWithPassword() {
   const router = useRouter();
   const [error, setError] = useState("");
+  const { mutate, isPending } = useSignIn();
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setError("");
 
     const formData = new FormData(event.currentTarget);
     const email = String(formData.get("email") ?? "").trim();
     const password = String(formData.get("password") ?? "");
 
-    if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
-      setError("Invalid email or password.");
+    if (!email || !password) {
+      setError("Email and password are required.");
       return;
     }
 
-    localStorage.setItem(
-      AUTH_STORAGE_KEY,
-      JSON.stringify({
-        email,
-        role: "Admin",
-        loggedInAt: new Date().toISOString(),
-      }),
+    mutate(
+      { email, password },
+      {
+        onSuccess: () => router.replace("/"),
+        onError: (err) => setError(getErrorMessage(err, "Invalid email or password.")),
+      },
     );
-    router.replace("/");
   };
 
   return (
@@ -49,6 +47,9 @@ export default function SigninWithPassword() {
             type="email"
             placeholder="Enter your email"
             name="email"
+            required
+            autoComplete="email"
+            disabled={isPending}
             className="w-full rounded-lg border border-stroke bg-white py-3.5 pl-4 pr-11 font-medium text-dark outline-none focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:focus:border-primary"
           />
 
@@ -85,7 +86,9 @@ export default function SigninWithPassword() {
             type="password"
             name="password"
             placeholder="Enter your password"
-            autoComplete="password"
+            autoComplete="current-password"
+            required
+            disabled={isPending}
             className="w-full rounded-lg border border-stroke bg-white py-3.5 pl-4 pr-11 font-medium text-dark outline-none focus:border-primary focus-visible:shadow-none dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:focus:border-primary"
           />
 
@@ -166,9 +169,10 @@ export default function SigninWithPassword() {
       <div className="mb-4.5">
         <button
           type="submit"
-          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3.5 font-semibold text-white transition hover:bg-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          disabled={isPending}
+          className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3.5 font-semibold text-white transition hover:bg-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-70"
         >
-          Login
+          {isPending ? "Signing in..." : "Login"}
         </button>
       </div>
     </form>

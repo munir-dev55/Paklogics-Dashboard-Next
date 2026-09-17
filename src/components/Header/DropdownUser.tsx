@@ -1,14 +1,24 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ClickOutside from "@/components/ClickOutside";
 import ConfirmationModal from "@/components/shared/ConfirmationModal";
 import { useRouter } from "next/navigation";
+import { clearSession, getDisplayName, getSession } from "@/lib/auth-session";
+import type { AuthSession } from "@/types/auth";
 
 const DropdownUser = () => {
   const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
+  const [session, setSession] = useState<AuthSession | null>(null);
+
+  useEffect(() => {
+    setSession(getSession());
+  }, []);
+
+  const displayName = session ? getDisplayName(session.user) : "Admin";
+  const displayEmail = session?.user.email ?? "";
 
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
@@ -29,7 +39,7 @@ const DropdownUser = () => {
         </span>
 
         <span className="flex items-center gap-2 font-medium text-dark dark:text-dark-6">
-          <span className="hidden lg:block">ADMIN</span>
+          <span className="hidden lg:block">{displayName}</span>
 
           <svg
             className={`fill-current duration-200 ease-in ${dropdownOpen && "rotate-180"}`}
@@ -70,10 +80,10 @@ const DropdownUser = () => {
 
             <span className="block">
               <span className="block font-medium text-dark dark:text-white">
-                Admin
+                {displayName}
               </span>
               <span className="block font-medium text-dark-5 dark:text-dark-6">
-                admin@adr.com
+                {displayEmail}
               </span>
             </span>
           </div>
@@ -233,7 +243,7 @@ const DropdownUser = () => {
         confirmLabel="Logout"
         onCancel={() => setLogoutOpen(false)}
         onConfirm={() => {
-          localStorage.removeItem("fedarb_admin_session");
+          clearSession();
           setLogoutOpen(false);
           router.replace("/auth/signin");
         }}

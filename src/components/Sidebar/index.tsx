@@ -7,6 +7,7 @@ import Image from "next/image";
 import SidebarItem from "@/components/Sidebar/SidebarItem";
 import ClickOutside from "@/components/ClickOutside";
 import ConfirmationModal from "@/components/shared/ConfirmationModal";
+import { clearSession } from "@/lib/auth-session";
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -104,6 +105,26 @@ const menuGroups = [
         ),
         label: "Billing & Invoices",
         route: "/billing-invoices",
+      },
+      {
+        icon: (
+          <svg
+            aria-hidden="true"
+            className="shrink-0"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />
+          </svg>
+        ),
+        label: "Audit Logs",
+        route: "/audit-logs",
       },
       // {
       //   icon: (
@@ -493,7 +514,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         confirmLabel="Logout"
         onCancel={() => setLogoutOpen(false)}
         onConfirm={() => {
-          localStorage.removeItem("fedarb_admin_session");
+          clearSession();
           setLogoutOpen(false);
           setSidebarOpen(false);
           router.replace("/auth/signin");

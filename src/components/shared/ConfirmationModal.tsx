@@ -10,6 +10,7 @@ type ConfirmationModalProps = {
   description: string;
   confirmLabel: string;
   cancelLabel?: string;
+  confirmDisabled?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 };
@@ -21,6 +22,7 @@ export default function ConfirmationModal({
   description,
   confirmLabel,
   cancelLabel = "Cancel",
+  confirmDisabled = false,
   onConfirm,
   onCancel,
 }: ConfirmationModalProps) {
@@ -94,7 +96,8 @@ export default function ConfirmationModal({
           <button
             type="button"
             onClick={onConfirm}
-            className="min-h-12 flex-[2.7] rounded-xl bg-error px-4 py-3 text-base font-semibold text-white hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-error"
+            disabled={confirmDisabled}
+            className="min-h-12 flex-[2.7] rounded-xl bg-error px-4 py-3 text-base font-semibold text-white hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-error disabled:cursor-not-allowed disabled:opacity-70"
           >
             {confirmLabel}
           </button>

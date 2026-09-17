@@ -9,3 +9,13 @@ export const dateLabel = (value: string) =>
     year: "numeric",
     timeZone: "UTC",
   }).format(new Date(value));
+
+export const dateTimeLabel = (value: string) =>
+  new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "UTC",
+  }).format(new Date(value));
