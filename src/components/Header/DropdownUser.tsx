@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import ClickOutside from "@/components/ClickOutside";
 import ConfirmationModal from "@/components/shared/ConfirmationModal";
+import LetterAvatar from "@/components/shared/LetterAvatar";
 import { useRouter } from "next/navigation";
 import { clearSession, getDisplayName, getSession } from "@/lib/auth-session";
 import type { AuthSession } from "@/types/auth";
@@ -27,16 +27,7 @@ const DropdownUser = () => {
         className="flex items-center gap-4"
         href="#"
       >
-        <span className="h-12 w-12 rounded-full">
-          <Image
-            src="https://png.pngtree.com/png-vector/20220709/ourmid/pngtree-businessman-user-avatar-wearing-suit-with-red-tie-png-image_5809521.png"
-            width={110}
-            height={110}
-            className="rounded-full"
-            alt="Profile"
-            priority
-          />
-        </span>
+        <LetterAvatar name={displayName} />
 
         <span className="flex items-center gap-2 font-medium text-dark dark:text-dark-6">
           <span className="hidden lg:block">{displayName}</span>
@@ -65,18 +56,7 @@ const DropdownUser = () => {
           className={`absolute right-0 mt-7.5 flex w-[280px] flex-col rounded-lg border-[0.5px] border-stroke bg-white shadow-default dark:border-dark-3 dark:bg-gray-dark`}
         >
           <div className="flex items-center gap-2.5 px-5 pb-5.5 pt-3.5">
-            <span className="relative block h-12 w-12 rounded-full">
-              <Image
-                src="https://png.pngtree.com/png-vector/20220709/ourmid/pngtree-businessman-user-avatar-wearing-suit-with-red-tie-png-image_5809521.png"
-                width={112}
-                height={112}
-                className="rounded-full"
-                alt="Profile"
-                priority
-              />
-
-              <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-green dark:border-gray-dark"></span>
-            </span>
+            <LetterAvatar name={displayName} showStatus />
 
             <span className="block">
               <span className="block font-medium text-dark dark:text-white">

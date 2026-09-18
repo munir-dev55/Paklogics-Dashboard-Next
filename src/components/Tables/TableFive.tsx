@@ -8,7 +8,7 @@ import InviteUserModal from "@/components/Users/InviteUserModal";
 import ClickOutside from "@/components/ClickOutside";
 import { getErrorMessage } from "@/lib/api-error";
 import { getSession } from "@/lib/auth-session";
-import { useSetUserStatus, useUsers } from "@/hooks/useUsers";
+import { useSetUserStatus, useResendInvite, useUsers } from "@/hooks/useUsers";
 import {
   ROLE_LABELS,
   USER_STATUS_LABELS,
@@ -59,10 +59,16 @@ export default function TableFive() {
   );
 
   const { data, isLoading, isFetching, isError, error: queryError } = useUsers(listParams);
-  const { mutate: setStatus, isPending: isUpdatingStatus } = useSetUserStatus();
+  const {
+    mutate: setStatus,
+    isPending: isUpdatingStatus,
+    variables: statusVariables,
+  } = useSetUserStatus();
+  const { mutate: resendInvite, isPending: isResendingInvite } = useResendInvite();
   const users = data?.users ?? [];
   const pagination = data?.pagination;
   const totalPages = Math.max(1, pagination?.totalPages ?? 1);
+  const updatingUserId = isUpdatingStatus ? statusVariables?.id : undefined;
 
   useEffect(() => {
     if (pagination && currentPage > pagination.totalPages && pagination.totalPages > 0) {
@@ -80,10 +86,11 @@ export default function TableFive() {
       { id: user.id, status, reason },
       {
         onSuccess: () => {
+          const label = user.name.trim() || user.email;
           toast.success(
             status === "ACTIVE"
-              ? `${user.name} is now active.`
-              : `${user.name} is now inactive.`,
+              ? `${label} is now active.`
+              : `${label} is now inactive.`,
           );
         },
         onError: (err) => {
@@ -199,6 +206,9 @@ export default function TableFive() {
                 const canToggle =
                   (user.status === "ACTIVE" || user.status === "DEACTIVATED") &&
                   user.id !== currentUserId;
+                const canResendInvite =
+                  user.status === "INVITED" || user.status === "INVITE_EXPIRED";
+                const isThisUserUpdating = updatingUserId === user.id;
 
                 return (
                   <tr
@@ -235,9 +245,9 @@ export default function TableFive() {
                         <button
                           type="button"
                           role="switch"
-                          disabled={!canToggle || isUpdatingStatus}
+                          disabled={!canToggle || isThisUserUpdating}
                           aria-checked={isActive}
-                          aria-label={`${isActive ? "Deactivate" : "Activate"} ${user.name}`}
+                          aria-label={`${isActive ? "Deactivate" : "Activate"} ${user.name || user.email}`}
                           onClick={() => toggleStatus(user)}
                           className="inline-flex rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-60"
                         >
@@ -257,6 +267,34 @@ export default function TableFive() {
                     </TableCell>
                     <TableCell align="right">
                       <div className="flex items-center justify-end gap-2">
+                        {canResendInvite && (
+                          <button
+                            type="button"
+                            disabled={isResendingInvite}
+                            onClick={() => {
+                              resendInvite(user.id, {
+                                onSuccess: () => {
+                                  toast.success(
+                                    `Invite resent to ${user.email}.`,
+                                  );
+                                },
+                                onError: (err) => {
+                                  toast.error(
+                                    getErrorMessage(
+                                      err,
+                                      "Unable to resend invite.",
+                                    ),
+                                  );
+                                },
+                              });
+                            }}
+                            aria-label={`Resend invite to ${user.email}`}
+                            title="Resend invite"
+                            className="inline-flex h-10 w-10 items-center justify-center rounded-full text-dark-5 transition-colors hover:bg-primary-light hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-40"
+                          >
+                            <ResendInviteIcon />
+                          </button>
+                        )}
                         <Link
                           href={`/users/details?id=${user.id}`}
                           aria-label={`View ${user.name}`}
@@ -304,7 +342,7 @@ export default function TableFive() {
       </p>
 
       {(pagination?.total ?? 0) > 0 && (
-        <div className="flex justify-center border-t border-stroke px-4 py-5 dark:border-dark-3">
+        <div className="flex justify-center border-t border-stroke px-3 py-4 sm:px-4 sm:py-5 dark:border-dark-3">
           <Pagination
             currentPage={pagination?.page ?? currentPage}
             totalPages={totalPages}
@@ -509,6 +547,25 @@ export function ViewIcon() {
     >
       <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
       <circle cx="12" cy="12" r="2.5" />
+    </svg>
+  );
+}
+
+function ResendInviteIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M22 2 11 13" />
+      <path d="m22 2-7 20-4-9-9-4 20-7Z" />
     </svg>
   );
 }

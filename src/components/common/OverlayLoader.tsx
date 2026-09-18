@@ -45,6 +45,15 @@ export function OverlayLoaderProvider({ children }: { children: ReactNode }) {
         return false;
       }
 
+      const isAuditLogDetail =
+        Array.isArray(query.queryKey) &&
+        query.queryKey[0] === "auditLogs" &&
+        query.queryKey[1] === "detail";
+
+      if (isAuditLogDetail) {
+        return false;
+      }
+
       return true;
     },
   });

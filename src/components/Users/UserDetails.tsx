@@ -4,8 +4,9 @@ import Link from "next/link";
 import Card from "@/components/shared/Card";
 import StatusBadge, { type StatusTone } from "@/components/shared/StatusBadge";
 import { getErrorMessage } from "@/lib/api-error";
-import { useUser } from "@/hooks/useUsers";
+import { useResendInvite, useUser } from "@/hooks/useUsers";
 import { USER_STATUS_LABELS, roleLabel, type UserStatus } from "@/types/enums";
+import { toast } from "sonner";
 
 const statusTones: Record<UserStatus, StatusTone> = {
   ACTIVE: "success",
@@ -17,6 +18,8 @@ const statusTones: Record<UserStatus, StatusTone> = {
 
 export default function UserDetails({ userId }: { userId: string }) {
   const { data: user, isLoading, isError, error } = useUser(userId);
+  const { mutate: resendInvite, isPending: isResendingInvite } =
+    useResendInvite();
 
   if (isLoading) {
     return <Card className="min-h-[240px] p-4 sm:p-6" />;
@@ -37,6 +40,8 @@ export default function UserDetails({ userId }: { userId: string }) {
   }
 
   const name = `${user.firstName} ${user.lastName}`.trim() || user.email;
+  const canResendInvite =
+    user.status === "INVITED" || user.status === "INVITE_EXPIRED";
 
   return (
     <Card className="p-4 sm:p-6">
@@ -69,12 +74,33 @@ export default function UserDetails({ userId }: { userId: string }) {
           </div>
         ))}
       </dl>
-      <Link
-        href="/users"
-        className="mt-8 inline-flex rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover"
-      >
-        Back to users
-      </Link>
+      <div className="mt-8 flex flex-wrap gap-3">
+        {canResendInvite && (
+          <button
+            type="button"
+            disabled={isResendingInvite}
+            onClick={() => {
+              resendInvite(user.id, {
+                onSuccess: () => {
+                  toast.success(`Invite resent to ${user.email}.`);
+                },
+                onError: (err) => {
+                  toast.error(getErrorMessage(err, "Unable to resend invite."));
+                },
+              });
+            }}
+            className="inline-flex rounded-lg border border-stroke px-4 py-2.5 text-sm font-semibold text-dark transition hover:bg-gray-2 disabled:cursor-not-allowed disabled:opacity-70 dark:border-dark-3 dark:text-white dark:hover:bg-dark-2"
+          >
+            {isResendingInvite ? "Resending…" : "Resend invite"}
+          </button>
+        )}
+        <Link
+          href="/users"
+          className="inline-flex rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover"
+        >
+          Back to users
+        </Link>
+      </div>
     </Card>
   );
 }

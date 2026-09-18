@@ -1,45 +1,62 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import DataTable, {
   RecordIdentity,
   type TableColumn,
 } from "@/components/shared/DataTable";
-import RecordFilters from "@/components/shared/RecordFilters";
+import FilterSelect, { ClearFiltersIcon } from "@/components/shared/FilterSelect";
 import StatusBadge, { type StatusTone } from "@/components/shared/StatusBadge";
 import SummaryCards from "@/components/shared/SummaryCards";
-import useRecordFilters from "@/components/shared/useRecordFilters";
-import { money, dateLabel } from "@/components/shared/formatters";
-import { invoices, statuses, type InvoiceRecord } from "./data";
+import { dateLabel, money } from "@/components/shared/formatters";
+import { getErrorMessage } from "@/lib/api-error";
+import { useInvoices } from "@/hooks/useInvoices";
+import {
+  INVOICE_FILTER_OPTIONS,
+  invoiceStatusLabel,
+  type InvoiceUiStatus,
+} from "@/types/enums";
+import type { AdminInvoice } from "@/types/invoices";
 
-const tones: Record<InvoiceRecord["status"], StatusTone> = {
-  Outstanding: "primary",
-  Paid: "success",
-  Overdue: "error",
+const PAGE_SIZE = 10;
+
+const tones: Record<InvoiceUiStatus, StatusTone> = {
+  OUTSTANDING: "primary",
+  PAID: "success",
+  OVERDUE: "error",
 };
-const columns: TableColumn<InvoiceRecord>[] = [
+
+const columns: TableColumn<AdminInvoice>[] = [
   {
     key: "invoice",
     header: "Invoice / Case",
     render: (record) => (
       <RecordIdentity
-        id={record.id}
-        name={record.name}
-        secondary={record.caseId}
+        id={record.invoiceNumber}
+        name={record.caseTitle || "—"}
+        secondary={record.caseNumber || undefined}
       />
     ),
   },
-  { key: "owner", header: "Billed to", render: (record) => record.owner },
+  {
+    key: "owner",
+    header: "Billed to",
+    render: (record) => record.billedTo || "—",
+  },
   {
     key: "status",
     header: "Status",
     render: (record) => (
-      <StatusBadge label={record.status} tone={tones[record.status]} />
+      <StatusBadge
+        label={invoiceStatusLabel(record.status)}
+        tone={tones[record.status]}
+      />
     ),
   },
   {
     key: "date",
     header: "Due date",
-    render: (record) => dateLabel(record.date),
+    render: (record) => (record.dueDate ? dateLabel(record.dueDate) : "—"),
     className: "whitespace-nowrap",
   },
   {
@@ -49,59 +66,98 @@ const columns: TableColumn<InvoiceRecord>[] = [
     className: "font-medium text-dark dark:text-white",
   },
 ];
-const stats = [
-  {
-    label: "Total billed",
-    value: money(invoices.reduce((sum, record) => sum + record.amount, 0)),
-  },
-  {
-    label: "Paid",
-    value: money(
-      invoices
-        .filter((record) => record.status === "Paid")
-        .reduce((sum, record) => sum + record.amount, 0),
-    ),
-  },
-  {
-    label: "Unpaid balance",
-    value: money(
-      invoices
-        .filter((record) => record.status !== "Paid")
-        .reduce((sum, record) => sum + record.amount, 0),
-    ),
-  },
-];
 
 export default function BillingInvoices() {
-  const filters = useRecordFilters(invoices, (record) => [
-    record.id,
-    record.caseId,
-    record.name,
-    record.owner,
-  ]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchInput, setSearchInput] = useState("");
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<InvoiceUiStatus | "">("");
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => setSearch(searchInput.trim()), 900);
+    return () => window.clearTimeout(timeout);
+  }, [searchInput]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, statusFilter]);
+
+  const listParams = useMemo(
+    () => ({
+      page: currentPage,
+      limit: PAGE_SIZE,
+      search,
+      status: statusFilter,
+    }),
+    [currentPage, search, statusFilter],
+  );
+
+  const { data, isError, error } = useInvoices(listParams);
+  const invoices = data?.invoices ?? [];
+  const summary = data?.summary;
+  const pagination = data?.pagination;
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div>
-          <p>View billing and invoice information.</p>
-        </div>
-      </div>
-      <SummaryCards items={stats} />
+      <p>View billing and invoice information.</p>
+      <SummaryCards
+        items={[
+          { label: "Total billed", value: money(summary?.totalBilled ?? 0) },
+          { label: "Paid", value: money(summary?.paid ?? 0) },
+          { label: "Unpaid balance", value: money(summary?.unpaidBalance ?? 0) },
+        ]}
+      />
+      {isError && (
+        <p className="rounded-lg bg-error-light px-4 py-3 text-sm font-medium text-error">
+          {getErrorMessage(error, "Unable to load invoices.")}
+        </p>
+      )}
       <DataTable
         label="Invoices"
-        caption="Sample billing and invoice information"
-        records={filters.filtered}
+        caption="Platform invoices"
+        records={invoices}
         columns={columns}
-        total={invoices.length}
-        pageSize={3}
-        detailsBasePath="/billing-invoices"
+        total={pagination?.total ?? 0}
+        currentPage={pagination?.page ?? currentPage}
+        totalPages={pagination?.totalPages ?? 1}
+        onPageChange={setCurrentPage}
+        getDetailsHref={(record) => `/billing-invoices/details?id=${record.id}`}
         toolbar={
-          <RecordFilters
-            label="Search invoices"
-            placeholder="Invoice, case, or billed to…"
-            statuses={statuses}
-            {...filters}
-          />
+          <div className="grid gap-4 border-b border-stroke p-5 dark:border-stroke-dark sm:grid-cols-[1fr_220px_auto] sm:items-end">
+            <label className="flex flex-col gap-2 text-sm font-medium text-dark dark:text-white">
+              Search invoices
+              <input
+                type="search"
+                value={searchInput}
+                onChange={(event) => setSearchInput(event.target.value)}
+                placeholder="Invoice, case, or billed to…"
+                className="rounded-lg border border-stroke bg-white px-3 py-2.5 text-sm text-dark outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-stroke-dark dark:bg-gray-dark dark:text-white"
+              />
+            </label>
+            <FilterSelect
+              label="Status"
+              value={statusFilter}
+              placeholder="Any status"
+              options={INVOICE_FILTER_OPTIONS}
+              onChange={(value) =>
+                setStatusFilter(value as InvoiceUiStatus | "")
+              }
+            />
+            <button
+              type="button"
+              title="Clear filters"
+              aria-label="Clear filters"
+              disabled={!searchInput && !statusFilter}
+              onClick={() => {
+                setSearchInput("");
+                setSearch("");
+                setStatusFilter("");
+              }}
+              className="inline-flex h-[42px] w-[42px] items-center justify-center rounded-lg border border-stroke text-dark-5 transition hover:bg-error-light hover:text-error disabled:cursor-not-allowed disabled:opacity-40 dark:border-dark-3 dark:text-white"
+            >
+              <ClearFiltersIcon />
+            </button>
+          </div>
         }
       />
     </div>

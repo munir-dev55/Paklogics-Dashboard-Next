@@ -76,6 +76,18 @@ export function useInviteUser() {
   });
 }
 
+export function useResendInvite() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => usersService.resendInvite(id),
+    onSuccess: (_data, id) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.users.detail(id) });
+    },
+  });
+}
+
 export function useSetUserStatus() {
   const queryClient = useQueryClient();
 
@@ -84,9 +96,62 @@ export function useSetUserStatus() {
       id,
       ...body
     }: SetUserStatusPayload & { id: string }) => usersService.setStatus(id, body),
-    onSuccess: (_data, variables) => {
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.users.all });
+
+      const previousLists = queryClient.getQueriesData<UsersListResult>({
+        queryKey: ["users", "list"],
+      });
+
+      queryClient.setQueriesData<UsersListResult>(
+        { queryKey: ["users", "list"] },
+        (current) => {
+          if (!current) return current;
+
+          return {
+            ...current,
+            users: current.users.map((user) =>
+              user.id === variables.id
+                ? { ...user, status: variables.status }
+                : user,
+            ),
+          };
+        },
+      );
+
+      const previousDetail = queryClient.getQueryData<UserDetails>(
+        queryKeys.users.detail(variables.id),
+      );
+
+      if (previousDetail) {
+        queryClient.setQueryData<UserDetails>(
+          queryKeys.users.detail(variables.id),
+          {
+            ...previousDetail,
+            status: variables.status,
+          },
+        );
+      }
+
+      return { previousLists, previousDetail };
+    },
+    onError: (_error, variables, context) => {
+      context?.previousLists.forEach(([queryKey, data]) => {
+        queryClient.setQueryData(queryKey, data);
+      });
+
+      if (context?.previousDetail) {
+        queryClient.setQueryData(
+          queryKeys.users.detail(variables.id),
+          context.previousDetail,
+        );
+      }
+    },
+    onSettled: (_data, _error, variables) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.users.all });
-      queryClient.invalidateQueries({ queryKey: queryKeys.users.detail(variables.id) });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.users.detail(variables.id),
+      });
     },
   });
 }

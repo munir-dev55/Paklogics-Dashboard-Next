@@ -24,6 +24,15 @@ export const usersService = {
     });
   },
 
+  resendInvite(id: string) {
+    return apiClient<{
+      user: UserDetails;
+      invitationToken: string;
+    }>(`/auth/users/${id}/resend-invite`, {
+      method: "POST",
+    });
+  },
+
   setStatus(id: string, body: SetUserStatusPayload) {
     return apiClient<unknown>(`/users/${id}/status`, {
       method: "PATCH",

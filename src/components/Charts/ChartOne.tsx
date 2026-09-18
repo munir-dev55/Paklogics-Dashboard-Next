@@ -1,17 +1,44 @@
-import { ApexOptions } from "apexcharts";
-import React from "react";
-import ReactApexChart from "react-apexcharts";
-import DefaultSelectOption from "@/components/SelectOption/DefaultSelectOption";
+"use client";
 
-const ChartOne: React.FC = () => {
+import { ApexOptions } from "apexcharts";
+import dynamic from "next/dynamic";
+import DefaultSelectOption from "@/components/SelectOption/DefaultSelectOption";
+import { money } from "@/components/shared/formatters";
+import type {
+  DashboardInvoicesOverview,
+  InvoicePeriod,
+} from "@/types/dashboard";
+
+const ReactApexChart = dynamic(() => import("react-apexcharts"), {
+  ssr: false,
+});
+
+const PERIOD_OPTIONS = ["Monthly", "Yearly"] as const;
+
+function periodLabel(period: InvoicePeriod) {
+  return period === "yearly" ? "Yearly" : "Monthly";
+}
+
+function periodFromLabel(label: string): InvoicePeriod {
+  return label === "Yearly" ? "yearly" : "monthly";
+}
+
+type Props = {
+  overview?: DashboardInvoicesOverview;
+  period: InvoicePeriod;
+  onPeriodChange: (period: InvoicePeriod) => void;
+};
+
+const ChartOne = ({ overview, period, onPeriodChange }: Props) => {
+  const categories = overview?.series.map((point) => point.label) ?? [];
   const series = [
     {
       name: "Received Amount",
-      data: [0, 20, 35, 45, 35, 55, 65, 50, 65, 75, 60, 75],
+      data: overview?.series.map((point) => point.receivedAmount) ?? [],
     },
     {
       name: "Due Amount",
-      data: [15, 9, 17, 32, 25, 68, 80, 68, 84, 94, 74, 62],
+      data: overview?.series.map((point) => point.dueAmount) ?? [],
     },
   ];
 
@@ -57,7 +84,6 @@ const ChartOne: React.FC = () => {
     stroke: {
       curve: "smooth",
     },
-
     markers: {
       size: 0,
     },
@@ -79,38 +105,18 @@ const ChartOne: React.FC = () => {
     },
     tooltip: {
       fixed: {
-        enabled: !1,
-      },
-      x: {
-        show: !1,
+        enabled: false,
       },
       y: {
-        title: {
-          formatter: function (e) {
-            return "";
-          },
-        },
+        formatter: (value) => money(value),
       },
       marker: {
-        show: !1,
+        show: false,
       },
     },
     xaxis: {
       type: "category",
-      categories: [
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-      ],
+      categories,
       axisBorder: {
         show: false,
       },
@@ -123,6 +129,13 @@ const ChartOne: React.FC = () => {
         style: {
           fontSize: "0px",
         },
+      },
+      labels: {
+        formatter: (value) =>
+          new Intl.NumberFormat("en-US", {
+            notation: "compact",
+            maximumFractionDigits: 1,
+          }).format(value),
       },
     },
   };
@@ -139,7 +152,11 @@ const ChartOne: React.FC = () => {
           <p className="font-medium uppercase text-dark dark:text-dark-6">
             Short by:
           </p>
-          <DefaultSelectOption options={["Monthly", "Yearly"]} />
+          <DefaultSelectOption
+            options={[...PERIOD_OPTIONS]}
+            value={periodLabel(period)}
+            onChange={(value) => onPeriodChange(periodFromLabel(value))}
+          />
         </div>
       </div>
       <div>
@@ -157,13 +174,13 @@ const ChartOne: React.FC = () => {
         <div className="border-stroke dark:border-dark-3 xsm:w-1/2 xsm:border-r">
           <p className="font-medium">Received Amount</p>
           <h4 className="mt-1 text-xl font-bold text-dark dark:text-white">
-            $45,070.00
+            {money(overview?.receivedAmount ?? 0)}
           </h4>
         </div>
         <div className="xsm:w-1/2">
           <p className="font-medium">Due Amount</p>
           <h4 className="mt-1 text-xl font-bold text-dark dark:text-white">
-            $32,400.00
+            {money(overview?.dueAmount ?? 0)}
           </h4>
         </div>
       </div>

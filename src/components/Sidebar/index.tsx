@@ -425,15 +425,22 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
         >
           {/* lg:py-6.5 xl:py-10 */}
 
-          <Link href="/" aria-label="FedArb ADR home">
+          <Link
+            href="/"
+            aria-label="FedArb ADR admin home"
+            className="flex min-w-0 items-center gap-2"
+          >
             <Image
               src="/images/fedarb-adr.svg"
               alt="FedArb ADR"
               width={150}
               height={40}
               priority
-              className="h-auto w-[160px]"
+              className="h-auto w-[140px] shrink-0"
             />
+            <span className="rounded bg-white/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+              Admin
+            </span>
           </Link>
 
           <button

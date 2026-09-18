@@ -1,19 +1,33 @@
+"use client";
+
 import React, { useState } from "react";
 import ClickOutside from "@/components/ClickOutside";
 
-const DefaultSelectOption = ({ options }: any) => {
-  const [selectedOption, setSelectedOption] = useState(options[0]);
+type Props = {
+  options: string[];
+  value?: string;
+  onChange?: (value: string) => void;
+};
+
+const DefaultSelectOption = ({ options, value, onChange }: Props) => {
+  const [internalValue, setInternalValue] = useState(options[0] ?? "");
   const [isOpen, setIsOpen] = useState(false);
+  const selectedOption = value ?? internalValue;
 
   const handleOptionSelect = (option: string) => {
-    setSelectedOption(option);
+    if (onChange) {
+      onChange(option);
+    } else {
+      setInternalValue(option);
+    }
     setIsOpen(false);
   };
 
   return (
     <ClickOutside onClick={() => setIsOpen(false)}>
       <div className="relative z-20 inline-flex cursor-pointer appearance-none rounded-[5px] border border-stroke bg-white text-sm font-medium outline-none dark:border-dark-3 dark:bg-dark-2">
-        <div
+        <button
+          type="button"
           className={`py-[5px] pl-[9px] pr-[35px] text-sm font-medium text-dark dark:text-white ${isOpen ? "open" : ""}`}
           onClick={() => setIsOpen(!isOpen)}
         >
@@ -37,17 +51,19 @@ const DefaultSelectOption = ({ options }: any) => {
               />
             </svg>
           </span>
-        </div>
+        </button>
         {isOpen && (
           <div className="absolute right-0 top-full z-40 mt-2 w-full rounded-[7px] border border-stroke bg-white py-1.5 shadow-2 dark:border-dark-3 dark:bg-dark-2 dark:shadow-card">
             <ul>
-              {options.map((option: string, index: number) => (
-                <li
-                  key={index}
-                  onClick={() => handleOptionSelect(option)}
-                  className={`flex w-full cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5 text-left font-medium hover:text-dark dark:hover:text-white ${selectedOption === option ? "selected" : ""}`}
-                >
-                  {option}
+              {options.map((option) => (
+                <li key={option}>
+                  <button
+                    type="button"
+                    onClick={() => handleOptionSelect(option)}
+                    className={`flex w-full cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5 text-left font-medium hover:text-dark dark:hover:text-white ${selectedOption === option ? "selected" : ""}`}
+                  >
+                    {option}
+                  </button>
                 </li>
               ))}
             </ul>

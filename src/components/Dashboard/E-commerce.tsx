@@ -1,27 +1,32 @@
 "use client";
-import React from "react";
-// import ChartThree from "../Charts/ChartThree";
-// import ChatCard from "../Chat/ChatCard";
-// import TableOne from "../Tables/TableOne";
-// import MapOne from "../Maps/MapOne";
+
+import { useState } from "react";
 import DataStatsOne from "@/components/DataStats/DataStatsOne";
 import ChartOne from "@/components/Charts/ChartOne";
+import { getErrorMessage } from "@/lib/api-error";
+import { useDashboard } from "@/hooks/useDashboard";
+import type { InvoicePeriod } from "@/types/dashboard";
 
-const ECommerce: React.FC = () => {
+export default function ECommerce() {
+  const [invoicePeriod, setInvoicePeriod] =
+    useState<InvoicePeriod>("monthly");
+  const { data, isError, error } = useDashboard(invoicePeriod);
+
   return (
     <>
-      <DataStatsOne />
+      {isError && (
+        <p className="mb-4 rounded-lg bg-error-light px-4 py-3 text-sm font-medium text-error">
+          {getErrorMessage(error, "Unable to load dashboard.")}
+        </p>
+      )}
+      <DataStatsOne kpis={data?.kpis} />
       <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-9 2xl:gap-7.5">
-        <ChartOne />
-        {/* <ChartThree />
-        <MapOne /> */}
-        {/* <div className="col-span-12 xl:col-span-8">
-          <TableOne />
-        </div> */}
-        {/* <ChatCard /> */}
+        <ChartOne
+          overview={data?.invoicesOverview}
+          period={invoicePeriod}
+          onPeriodChange={setInvoicePeriod}
+        />
       </div>
     </>
   );
-};
-
-export default ECommerce;
+}

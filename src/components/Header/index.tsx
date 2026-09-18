@@ -32,10 +32,6 @@ const getHeaderTitle = (pathname: string) => {
     return "Invoice Details";
   }
 
-  if (pathname.startsWith("/audit-logs/")) {
-    return "Audit Log Details";
-  }
-
   return (
     pathname
       .split("/")

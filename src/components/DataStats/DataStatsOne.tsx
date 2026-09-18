@@ -1,3 +1,7 @@
+"use client";
+
+import type { DashboardKpis } from "@/types/dashboard";
+
 type StatsIconName = "cases" | "users" | "invoices" | "blocked";
 
 type DataStatItem = {
@@ -5,42 +9,43 @@ type DataStatItem = {
   color: string;
   title: string;
   value: string;
-  growthRate: number;
 };
 
-const dataStatsList: DataStatItem[] = [
-  {
-    icon: "users",
-    color: "#18BFFF",
-    title: "Total Users",
-    value: "3,465",
-    growthRate: 2.59,
-  },
-  {
-    icon: "blocked",
-    color: "var(--color-error)",
-    title: "Blocked Users",
-    // No blocked-user total is connected yet.
-    value: "—",
-    growthRate: 0,
-  },
-  {
-    icon: "cases",
-    color: "#2563EA",
-    title: "Total Cases",
-    value: "3,456",
-    growthRate: 0.43,
-  },
-  {
-    icon: "invoices",
-    color: "#8155FF",
-    title: "Total Invoices",
-    value: "2,450",
-    growthRate: 4.35,
-  },
-];
+const numberLabel = (value: number) =>
+  new Intl.NumberFormat("en-US").format(value);
 
-export default function DataStatsOne() {
+function buildStats(kpis?: DashboardKpis): DataStatItem[] {
+  return [
+    {
+      icon: "users",
+      color: "#18BFFF",
+      title: "Total Users",
+      value: numberLabel(kpis?.totalUsers ?? 0),
+    },
+    {
+      icon: "blocked",
+      color: "var(--color-error)",
+      title: "Blocked Users",
+      value: numberLabel(kpis?.blockedUsers ?? 0),
+    },
+    {
+      icon: "cases",
+      color: "#2563EA",
+      title: "Total Cases",
+      value: numberLabel(kpis?.totalCases ?? 0),
+    },
+    {
+      icon: "invoices",
+      color: "#8155FF",
+      title: "Total Invoices",
+      value: numberLabel(kpis?.totalInvoices ?? 0),
+    },
+  ];
+}
+
+export default function DataStatsOne({ kpis }: { kpis?: DashboardKpis }) {
+  const dataStatsList = buildStats(kpis);
+
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
       {dataStatsList.map((item) => (
@@ -62,13 +67,6 @@ export default function DataStatsOne() {
               </h4>
               <span className="text-body-sm font-medium">{item.title}</span>
             </div>
-
-            {/* <span
-              className={`flex shrink-0 items-center gap-1.5 text-body-sm font-medium ${item.growthRate > 0 ? "text-green" : "text-red"}`}
-            >
-              {item.growthRate}%
-              <TrendIcon direction={item.growthRate > 0 ? "up" : "down"} />
-            </span> */}
           </div>
         </div>
       ))}
@@ -123,21 +121,6 @@ function StatsIcon({ type }: { type: StatsIconName }) {
       <path d="M3 20v-2a6 6 0 0 1 9-5.2" />
       <circle cx="17" cy="17" r="4" />
       <path d="m14.2 14.2 5.6 5.6" />
-    </svg>
-  );
-}
-
-function TrendIcon({ direction }: { direction: "up" | "down" }) {
-  return (
-    <svg
-      aria-hidden="true"
-      width="10"
-      height="10"
-      viewBox="0 0 10 10"
-      fill="currentColor"
-      className={direction === "down" ? "rotate-180" : ""}
-    >
-      <path d="M4.36 2.39.91 5.75 0 4.86 5 0l5 4.86-.91.89-3.45-3.36V10H4.36V2.39Z" />
     </svg>
   );
 }
