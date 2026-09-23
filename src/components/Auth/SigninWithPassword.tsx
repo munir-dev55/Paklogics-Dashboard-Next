@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { getErrorMessage } from "@/lib/api-error";
+import { getErrorMessage } from "@/lib/ui-error";
 import { useSignIn } from "@/hooks/useSignIn";
 
 export default function SigninWithPassword() {

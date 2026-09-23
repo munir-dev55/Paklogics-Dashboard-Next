@@ -41,7 +41,7 @@ const ProfileBox = () => {
           <h3 className="mb-1 text-heading-6 font-bold text-dark dark:text-white">
             {displayName}
           </h3>
-          <p className="font-medium">{displayRole}</p>
+          {/* <p className="font-medium">{displayRole}</p> */}
           <div className="mx-auto mt-4 max-w-[720px]">
             <h4 className="font-medium text-dark dark:text-white">
               {displayEmail || "—"}

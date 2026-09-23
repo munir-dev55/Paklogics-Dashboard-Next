@@ -3,7 +3,7 @@
 import { useState } from "react";
 import DataStatsOne from "@/components/DataStats/DataStatsOne";
 import ChartOne from "@/components/Charts/ChartOne";
-import { getErrorMessage } from "@/lib/api-error";
+import { getErrorMessage } from "@/lib/ui-error";
 import { useDashboard } from "@/hooks/useDashboard";
 import type { InvoicePeriod } from "@/types/dashboard";
 

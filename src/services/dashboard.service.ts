@@ -1,11 +1,8 @@
-import { apiClient } from "@/lib/api-client";
-import { withQuery } from "@/lib/query-string";
-import type { AdminDashboard, InvoicePeriod } from "@/types/dashboard";
+import { STATIC_DASHBOARDS, staticDelay } from "@/data/static-data";
+import type { InvoicePeriod } from "@/types/dashboard";
 
 export const dashboardService = {
   get(invoicePeriod: InvoicePeriod = "monthly") {
-    return apiClient<AdminDashboard>(
-      withQuery("/admin/dashboard", { invoicePeriod }),
-    );
+    return staticDelay(STATIC_DASHBOARDS[invoicePeriod]);
   },
 };

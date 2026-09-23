@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { createPortal } from "react-dom";
-import { getErrorMessage } from "@/lib/api-error";
+import { getErrorMessage } from "@/lib/ui-error";
 import { useInviteUser } from "@/hooks/useUsers";
 import {
   INVITABLE_ROLES,

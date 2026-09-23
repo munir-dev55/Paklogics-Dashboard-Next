@@ -4,7 +4,7 @@ import Link from "next/link";
 import Card from "@/components/shared/Card";
 import { dateLabel } from "@/components/shared/formatters";
 import StatusBadge, { type StatusTone } from "@/components/shared/StatusBadge";
-import { getErrorMessage } from "@/lib/api-error";
+import { getErrorMessage } from "@/lib/ui-error";
 import { useCase } from "@/hooks/useCases";
 import { caseStatusLabel, type CaseLifecycleStatus } from "@/types/enums";
 

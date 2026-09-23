@@ -9,7 +9,7 @@ import FilterSelect, { ClearFiltersIcon } from "@/components/shared/FilterSelect
 import StatusBadge, { type StatusTone } from "@/components/shared/StatusBadge";
 import SummaryCards from "@/components/shared/SummaryCards";
 import { dateLabel } from "@/components/shared/formatters";
-import { getErrorMessage } from "@/lib/api-error";
+import { getErrorMessage } from "@/lib/ui-error";
 import { useCases } from "@/hooks/useCases";
 import {
   CASE_FILTER_OPTIONS,

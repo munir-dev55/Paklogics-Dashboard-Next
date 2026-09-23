@@ -18,10 +18,10 @@ export default function RootLayout({
     <html lang="en">
       <body suppressHydrationWarning={true}>
         <QueryProvider>
-          <OverlayLoaderProvider>
-            <AuthGuard>{children}</AuthGuard>
-            <Toaster richColors position="top-right" />
-          </OverlayLoaderProvider>
+          {/* <OverlayLoaderProvider> */}
+          <AuthGuard>{children}</AuthGuard>
+          <Toaster richColors position="top-right" />
+          {/* </OverlayLoaderProvider> */}
         </QueryProvider>
       </body>
     </html>

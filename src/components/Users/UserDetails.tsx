@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Card from "@/components/shared/Card";
 import StatusBadge, { type StatusTone } from "@/components/shared/StatusBadge";
-import { getErrorMessage } from "@/lib/api-error";
+import { getErrorMessage } from "@/lib/ui-error";
 import { useResendInvite, useUser } from "@/hooks/useUsers";
 import { USER_STATUS_LABELS, roleLabel, type UserStatus } from "@/types/enums";
 import { toast } from "sonner";

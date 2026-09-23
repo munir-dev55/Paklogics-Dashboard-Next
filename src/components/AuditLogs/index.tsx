@@ -5,7 +5,7 @@ import DataTable, { type TableColumn } from "@/components/shared/DataTable";
 import FilterSelect, { ClearFiltersIcon } from "@/components/shared/FilterSelect";
 import SummaryCards from "@/components/shared/SummaryCards";
 import { dateTimeLabel } from "@/components/shared/formatters";
-import { getErrorMessage } from "@/lib/api-error";
+import { getErrorMessage } from "@/lib/ui-error";
 import { toast } from "sonner";
 import {
   useAuditLog,

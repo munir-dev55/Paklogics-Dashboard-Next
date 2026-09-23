@@ -1,75 +1,40 @@
-import { getAccessToken, clearSession } from "@/lib/auth-session";
-import { ApiError } from "@/lib/api-error";
-import { apiClient } from "@/lib/api-client";
-import { withQuery } from "@/lib/query-string";
+import { STATIC_AUDIT_LOGS, staticDelay } from "@/data/static-data";
+import { includesSearch, paginate } from "@/data/static-utils";
 import type {
-  AdminAuditLogDetail,
   AuditLogsListParams,
   AuditLogsListResult,
 } from "@/types/audit-logs";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-
-function getBaseUrl() {
-  if (!API_BASE_URL) {
-    throw new ApiError(500, "API base URL is not configured.");
-  }
-
-  return API_BASE_URL.replace(/\/$/, "");
+function filterLogs(params: Omit<AuditLogsListParams, "page" | "limit">) {
+  return STATIC_AUDIT_LOGS.filter((record) =>
+    (!params.module || record.module === params.module) &&
+    (!params.role || record.actingUserRoleSnapshot === params.role) &&
+    (!params.from || record.createdAt >= params.from) &&
+    (!params.to || record.createdAt <= params.to) &&
+    includesSearch([
+      record.id, record.action, record.affectedRecordType,
+      record.affectedRecordId, record.actor?.email,
+      record.actor?.firstName, record.actor?.lastName,
+    ], params.search),
+  );
 }
 
-function filenameFromDisposition(header: string | null) {
-  if (!header) return null;
-  const utfMatch = header.match(/filename\*=UTF-8''([^;]+)/i);
-  if (utfMatch?.[1]) {
-    return decodeURIComponent(utfMatch[1].trim());
-  }
-  const match = header.match(/filename="?([^";]+)"?/i);
-  return match?.[1]?.trim() ?? null;
+function csvCell(value: unknown) {
+  const text = typeof value === "object" ? JSON.stringify(value) : String(value ?? "");
+  return `"${text.replace(/"/g, '""')}"`;
 }
 
-async function downloadCsv(path: string) {
-  const token = getAccessToken();
-
-  let response: Response;
-  try {
-    response = await fetch(`${getBaseUrl()}${path}`, {
-      headers: {
-        "ngrok-skip-browser-warning": "true",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-    });
-  } catch {
-    throw new ApiError(0, "Unable to reach the server. Please try again.");
-  }
-
-  if (!response.ok) {
-    if (response.status === 401) {
-      clearSession();
-      if (typeof window !== "undefined" && !window.location.pathname.startsWith("/auth")) {
-        window.location.replace("/auth/signin");
-      }
-    }
-
-    let message = "Unable to export audit logs.";
-    try {
-      const payload = (await response.json()) as { message?: string };
-      if (payload.message) message = payload.message;
-    } catch {
-      // raw CSV error body
-    }
-    throw new ApiError(response.status, message);
-  }
-
-  const blob = await response.blob();
-  const filename =
-    filenameFromDisposition(response.headers.get("Content-Disposition")) ||
-    `audit-logs-${new Date().toISOString().slice(0, 10)}.csv`;
-
+function downloadCsv(records: typeof STATIC_AUDIT_LOGS) {
+  const headings = ["Timestamp", "Action", "Module", "Role", "Actor", "Record type", "Record ID", "Reason"];
+  const rows = records.map((record) => [
+    record.createdAt, record.action, record.module, record.actingUserRoleSnapshot,
+    record.actor?.email, record.affectedRecordType, record.affectedRecordId, record.reason,
+  ].map(csvCell).join(","));
+  const blob = new Blob([[headings.map(csvCell).join(","), ...rows].join("\n")], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = filename;
+  link.download = `audit-logs-${new Date().toISOString().slice(0, 10)}.csv`;
   document.body.appendChild(link);
   link.click();
   link.remove();
@@ -78,14 +43,21 @@ async function downloadCsv(path: string) {
 
 export const auditLogsService = {
   list(params: AuditLogsListParams) {
-    return apiClient<AuditLogsListResult>(withQuery("/admin/audit-logs", params));
+    const filtered = filterLogs(params);
+    const page = paginate(filtered, params.page, params.limit);
+    return staticDelay<AuditLogsListResult>({
+      auditLogs: page.records, pagination: page.pagination,
+      summary: { totalEvents: filtered.length },
+    });
   },
 
   getById(id: string) {
-    return apiClient<AdminAuditLogDetail>(`/admin/audit-logs/${id}`);
+    const record = STATIC_AUDIT_LOGS.find((item) => item.id === id);
+    return record ? staticDelay(record) : Promise.reject(new Error("Audit event not found."));
   },
 
   exportCsv(params: Omit<AuditLogsListParams, "page" | "limit">) {
-    return downloadCsv(withQuery("/admin/audit-logs/export", params));
+    downloadCsv(filterLogs(params));
+    return staticDelay(undefined);
   },
 };

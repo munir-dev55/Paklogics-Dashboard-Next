@@ -6,7 +6,7 @@ import Link from "next/link";
 import ConfirmationModal from "@/components/shared/ConfirmationModal";
 import InviteUserModal from "@/components/Users/InviteUserModal";
 import ClickOutside from "@/components/ClickOutside";
-import { getErrorMessage } from "@/lib/api-error";
+import { getErrorMessage } from "@/lib/ui-error";
 import { getSession } from "@/lib/auth-session";
 import { useSetUserStatus, useResendInvite, useUsers } from "@/hooks/useUsers";
 import {

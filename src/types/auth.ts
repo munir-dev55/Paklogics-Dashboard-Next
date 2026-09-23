@@ -1,4 +1,4 @@
-import type { RoleName } from "@/types/enums";
+import type { RoleName, UserStatus } from "@/types/enums";
 
 export type SignInPayload = {
   email: string;
@@ -13,7 +13,7 @@ export type AuthUser = {
   phone: string | null;
   jobTitle: string | null;
   userType: "INTERNAL" | "EXTERNAL";
-  status: string;
+  status: UserStatus;
   roleId: string;
   role: {
     id: string;
@@ -28,10 +28,8 @@ export type AuthUser = {
 
 export type SignInResult = {
   user: AuthUser;
-  accessToken: string;
 };
 
 export type AuthSession = {
-  accessToken: string;
   user: AuthUser;
 };
